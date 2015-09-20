@@ -1,22 +1,21 @@
+var config = {
+  sassPath: './public/resources/sass',
+  bowerDir: './bower_components',
+  fileName: 'rogue-os.js'   
+}
+
 // Gulp Dependencies
 var gulp = require('gulp');
-var rename = require('gulp-rename');
 
 // Build Dependencies
-var browserify = require('gulp-browserify');
-var uglify = require('gulp-uglify');
 var bower = require('gulp-bower');
-
-// Style Dependencies
-var less = require('gulp-less');
-var prefix = require('gulp-autoprefixer');
-var minifyCSS = require('gulp-minify-css');
 
 // Development Dependencies
 var jshint = require('gulp-jshint');
 
 // Test Dependencies
-var mochaPhantomjs = require('gulp-mocha-phantomjs');
+var mocha = require('gulp-mocha');
+var util = require('gulp-util');
 
 gulp.task('lint-client', function() {
   return gulp.src('./client/**/*.js')
@@ -35,4 +34,12 @@ gulp.task('bower', function() {
     .pipe(gulp.dest(config.bowerDir))
 });
 
+gulp.task('test', ['lint-test'], function() {
+  return gulp.src('test/client/index.js')
+    .pipe(mocha({ reporter: 'spec' }))
+    .on('error', util.log);
+});
 
+gulp.task('watch-test', function () {
+    gulp.watch(['client/**', 'test/**'], ['test']);
+});
