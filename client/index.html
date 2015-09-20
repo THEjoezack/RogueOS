@@ -5,14 +5,31 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>RogueOS</title>
-    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: black;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-<h1>RogueOS</h1>
-    <div id="example-map-container" class="game-container"></div>
-    <div id="example-console-container" class="game-container"></div>
+    <div class="container">
+        <div class="site-container">
+            <h1>RogueOS</h1>
+            <div id="example-map-container" class="game-container"></div>
+            <div id="example-console-container" class="game-container"></div>
+        </div>
+    </div>
 
+    <!-- bootstrap -->
+    <script src="jquery/dist/jquery.min.js"></script>
+    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <!-- rot.js -->
     <script src="rot.js/rot.js"></script>
+
+    <!-- js-roguelike-skeleton -->
     <script src="js-roguelike-skeleton/src/rl.js"></script>
     <script src="js-roguelike-skeleton/src/util.js"></script>
     <script src="js-roguelike-skeleton/src/mixins.js"></script>
@@ -31,11 +48,8 @@
     <script src="js-roguelike-skeleton/src/object-manager.js"></script>
     <script src="js-roguelike-skeleton/src/multi-object-manager.js"></script>
     <script src="js-roguelike-skeleton/src/game.js"></script>
+
+    <!-- custom -->
     <script src="index.js"></script>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="bootstrap/dist/js/bootstrap.min.js"></script>
-
 </body>
 </html>
