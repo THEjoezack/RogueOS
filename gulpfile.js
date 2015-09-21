@@ -34,12 +34,12 @@ gulp.task('bower', function() {
     .pipe(gulp.dest(config.bowerDir))
 });
 
-gulp.task('test', ['lint-test'], function() {
-  return gulp.src('test/client/index.js')
+gulp.task('test', ['lint-client', 'lint-test'], function() {
+  return gulp.src('./test/**/*.js')
     .pipe(mocha({ reporter: 'spec' }))
     .on('error', util.log);
 });
 
-gulp.task('watch-test', function () {
+gulp.task('watch', function () {
     gulp.watch(['client/**', 'test/**'], ['test']);
 });
