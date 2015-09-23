@@ -6,8 +6,7 @@
   "directories": {
     "test": "test"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "https://github.com/THEjoezack/RogueOS.git"
@@ -27,6 +26,7 @@
     "gulp-autoprefixer": "^3.0.1",
     "gulp-bower": "0.0.10",
     "gulp-browserify": "^0.5.1",
+    "gulp-clean": "^0.3.1",
     "gulp-jshint": "^1.11.2",
     "gulp-less": "^3.0.3",
     "gulp-minify-css": "^1.2.1",

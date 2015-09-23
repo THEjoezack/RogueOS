@@ -17,6 +17,10 @@ var jshint = require('gulp-jshint');
 var mocha = require('gulp-mocha');
 var util = require('gulp-util');
 
+// Publish Dependencies
+var clean = require('gulp-clean');
+
+// Tasks
 gulp.task('lint-client', function() {
   return gulp.src('./client/**/*.js')
     .pipe(jshint())
@@ -42,4 +46,14 @@ gulp.task('test', ['lint-client', 'lint-test'], function() {
 
 gulp.task('watch', function () {
     gulp.watch(['client/**', 'test/**'], ['test']);
+});
+
+gulp.task('clean', function(){
+  return gulp.src(['./public/*'], {read:false})
+    .pipe(clean());
+});
+
+gulp.task('publish',['clean'], function(){
+  gulp.src(['client/**/*', 'bower_components/**/*'])
+    .pipe(gulp.dest('./public'));
 });
