@@ -1,0 +1,1 @@
+this.RogueOS = { test: '123'};
