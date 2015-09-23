@@ -1,9 +1,7 @@
 (function(root) {
     'use strict';
 
-    var MapBuilder = function MapBuilder(game) {
-        this.game = game;
-    };
+    var MapBuilder = function MapBuilder() {};
 
     MapBuilder.prototype = {
         constructor: MapBuilder,
@@ -15,11 +13,11 @@
                     '.': 'floor',
                     '+': 'door'
                 },
-                data: this.randomMap(40, 40)
+                data: this.randomMap(50, 50)
             };
         },
         randomMap: function(width, height) {
-            var digger = new ROT.Map.Digger(width, height);
+            var digger = new root.ROT.Map.Digger(width, height);
             var map = [];
             var digCallback = function(x, y, value) {
                 if(!map[x]) {
@@ -38,7 +36,7 @@
             return [
                 '#####################',
                 '#.........#.........#',
-                '#....Z....#....##...#',
+                '#.........#....##...#',
                 '#.........+....##...#',
                 '#.........#.........#',
                 '#.#..#..#.#.........#',
@@ -51,6 +49,6 @@
         }
     };
 
-    root.MapBuilder = MapBuilder;
+    root.RogueOS.MapBuilder = MapBuilder;
 
-}(this.RogueOS || this));
+})(this);

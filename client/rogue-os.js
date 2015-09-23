@@ -1,1 +1,1 @@
-this.RogueOS = {};
+this.RogueOS = { test: '123'};

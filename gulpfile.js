@@ -35,7 +35,7 @@ gulp.task('bower', function() {
 });
 
 gulp.task('test', ['lint-client', 'lint-test'], function() {
-  return gulp.src('./test/**/*.js')
+  return gulp.src('./test/index.html')
     .pipe(mocha({ reporter: 'spec' }))
     .on('error', util.log);
 });
