@@ -1,54 +1,52 @@
-(function(root) {
-    'use strict';
+module.exports = {
+    build: build
+}
 
-    var MapBuilder = function MapBuilder() {};
-
-    MapBuilder.prototype = {
-        constructor: MapBuilder,
-        build: function(){
-            return {
-                defaultType: 'floor',
-                charToType: {
-                    '#': 'wall',
-                    '.': 'floor',
-                    '+': 'door'
-                },
-                data: this.randomMap(50, 50)
-            };
+function build(width, height){
+    var map = randomMap(width, height);
+    return {
+        defaultType: 'floor',
+        charToType: {
+            '#': 'wall',
+            '.': 'floor',
+            '+': 'door'
         },
-        randomMap: function(width, height) {
-            var digger = new root.ROT.Map.Digger(width, height);
-            var map = [];
-            var digCallback = function(x, y, value) {
-                if(!map[x]) {
-                    map[x] = [];
-                }
-                if (value) {
-                    map[x][y] = "#";
-                } else {
-                    map[x][y] = ".";
-                }
-            }
-            digger.create(digCallback.bind(this));
-            return map;
-        },
-        staticMap: function() {
-            return [
-                '#####################',
-                '#.........#.........#',
-                '#.........#....##...#',
-                '#.........+....##...#',
-                '#.........#.........#',
-                '#.#..#..#.#.........#',
-                '#.........#...####+##',
-                '#.........#...#.....#',
-                '#.........#...#.....#',
-                '#.........#...#.....#',
-                '#####################'
-            ];
-        }
+        map: map.map,
+        freeSpaces: map.freeSpaces
     };
+}
 
-    root.RogueOS.MapBuilder = MapBuilder;
+var randomMap = function(rot, width, height) {
+    var digger = new rot.Map.Digger(width, height);
+    var map = [];
+    var freeSpaces = [];
+    var digCallback = function(x, y, value) {
+        if(!map[x]) {
+            map[x] = [];
+        }
+        if (value) {
+            map[x][y] = "#";
+        } else {
+            map[x][y] = ".";
+            freeSpaces.push({ x: x, y: y});
+        }
+    }
+    digger.create(digCallback.bind(this));
+    return { map: map, freeSpaces: freeSpaces };
+}
 
-})(this);
+var staticMap = function() {
+    return [
+        '#####################',
+        '#.........#.........#',
+        '#.........#....##...#',
+        '#.........+....##...#',
+        '#.........#.........#',
+        '#.#..#..#.#.........#',
+        '#.........#...####+##',
+        '#.........#...#.....#',
+        '#.........#...#.....#',
+        '#.........#...#.....#',
+        '#####################'
+    ];
+}

@@ -1,13 +1,13 @@
 var config = {
   sassPath: './public/resources/sass',
-  bowerDir: './bower_components',
-  fileName: 'rogue-os.js'   
+   bowerDir: './bower_components'
 }
 
 // Gulp Dependencies
 var gulp = require('gulp');
 
 // Build Dependencies
+var browserify = require('gulp-browserify');
 var bower = require('gulp-bower');
 
 // Development Dependencies
@@ -39,21 +39,31 @@ gulp.task('bower', function() {
 });
 
 gulp.task('test', ['lint-client', 'lint-test'], function() {
-  return gulp.src('./test/index.html')
+  return gulp.src('./test/**/*.js')
     .pipe(mocha({ reporter: 'spec' }))
     .on('error', util.log);
 });
 
 gulp.task('watch', function () {
-    gulp.watch(['client/**', 'test/**'], ['test']);
+    gulp.watch(['./client/**', 'test/**'], ['test']);
 });
 
 gulp.task('clean', function(){
-  return gulp.src(['./public/*'], {read:false})
+  return gulp.src(['./public', './build'], {read:false})
     .pipe(clean());
 });
 
-gulp.task('publish',['clean'], function(){
-  gulp.src(['client/**/*', 'bower_components/**/*'])
+gulp.task('publish',['bundle'], function(){
+  gulp.src(['./client/**/*.html', './bower_components/**/*', './build/**/*'])
     .pipe(gulp.dest('./public'));
+});
+
+gulp.task('bundle', function() {
+  // Single entry point to browserify
+  gulp.src('./client/index.js')
+      .pipe(browserify({
+        insertGlobals : true,
+        debug : true
+      }))
+      .pipe(gulp.dest('./build'))
 });

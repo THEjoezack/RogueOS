@@ -1,23 +1,19 @@
-// create the game instance
 /*globals RL*/
 var rl = RL;
-
-/*globals RogueOS*/
-var rogueOS = RogueOS;
 var game = new rl.Game();
 
 var keyBindings = {
     up: ['UP_ARROW', 'K', 'W'],
     down: ['DOWN_ARROW', 'J', 'S'],
     left: ['LEFT_ARROW', 'H', 'A'],
-    right: ['RIGHT_ARROW', 'L', 'D'],
+    right: ['RIGHT_ARROW', 'L', 'D']
 };
 
-var mapBuilder = new rogueOS.MapBuilder();
-var mapData = mapBuilder.build();
+var mapBuilder = require('./map-builder');
+var mapData = mapBuilder.build(ROT, 50, 50);
 
-game.map.loadTilesFromArrayString(mapData.data, mapData.charToType, mapData.defaultType);
-game.entityManager.loadFromArrayString(mapData.data, {
+game.map.loadTilesFromArrayString(mapData.map, mapData.charToType, mapData.defaultType);
+game.entityManager.loadFromArrayString(mapData.map, {
     'Z': 'zombie'
 });
 
@@ -32,43 +28,19 @@ game.setMapSize(game.map.width, game.map.height);
 game.input.addBindings(keyBindings);
 
 // create entities and add to game.entityManager
-var entZombie = new RL.Entity(game, 'zombie');
+var entZombie = new rl.Entity(game, 'zombie');
 game.entityManager.add(2, 8, entZombie);
 
-var taken = [];
-// set player starting position
-function findFreeSpot(mapData) {
-    for(var x = 0; x < mapData.data.length; x++) {
-        for(var y = 0; y < mapData.data[x].length; y++) {
-            if(mapData.data[y][x] === '.') {
-                var skip = false;
-                for(var i = 0; i < taken.length; i++) {
-                    if(taken[i].x === x && taken[i].y === y) {
-                        skip = true;
-                        break;
-                    }
-                }
-                if(skip) {
-                    continue;
-                }
-                var point = {
-                    x: x,
-                    y: y
-                };
-                taken.push(point);
-                return point;
-            }
-        }
-    }
-}
+var tracker = require('./map-tracker');
+var shuffled = tracker.shuffle(mapData.freeSpaces);
 
-// or just add by entity type
+// toss some zombies in there!
 for(var i = 0; i < 10; i++) {
-    var spot = findFreeSpot(mapData);
+    var spot = shuffled.pop();
     game.entityManager.add(spot.x, spot.y, 'zombie');
 }
 
-var playerSpot = findFreeSpot(mapData);
+var playerSpot = shuffled.pop();
 game.player.x = playerSpot.x;
 game.player.y = playerSpot.y;
 
@@ -76,7 +48,7 @@ game.player.y = playerSpot.y;
 //game.renderer.resize(10, 14);
 
 // get existing DOM elements
-var document = this;
+var document = window.document;
 var mapContainerEl = document.getElementById('example-map-container');
 var consoleContainerEl = document.getElementById('example-console-container');
 
