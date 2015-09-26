@@ -1,14 +1,12 @@
-var config = {
-  sassPath: './public/resources/sass',
-   bowerDir: './bower_components'
-}
-
 // Gulp Dependencies
 var gulp = require('gulp');
 
 // Build Dependencies
-var browserify = require('gulp-browserify');
+var browserify = require('browserify');
 var bower = require('gulp-bower');
+var transform = require('vinyl-transform');
+var uglify = require('gulp-uglify');
+var through2 = require('through2');
 
 // Development Dependencies
 var jshint = require('gulp-jshint');
@@ -35,7 +33,7 @@ gulp.task('lint-test', function() {
 
 gulp.task('bower', function() {
   return bower()
-    .pipe(gulp.dest(config.bowerDir))
+    .pipe(gulp.dest('./bower_components'))
 });
 
 gulp.task('test', ['lint-client', 'lint-test'], function() {
@@ -58,12 +56,15 @@ gulp.task('publish',['bundle'], function(){
     .pipe(gulp.dest('./public'));
 });
 
-gulp.task('bundle', function() {
-  // Single entry point to browserify
-  gulp.src('./client/index.js')
-      .pipe(browserify({
-        insertGlobals : true,
-        debug : true
+gulp.task('bundle', ['clean'], function () {
+  return gulp.src('./client/**/*.js')
+      .pipe(through2.obj(function (file, enc, next){
+        browserify(file.path)
+            .bundle(function(err, res){
+              // assumes file.contents is a Buffer
+              file.contents = res;
+              next(null, file);
+            });
       }))
-      .pipe(gulp.dest('./build'))
+      .pipe(gulp.dest('./build/'))
 });
