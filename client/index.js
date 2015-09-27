@@ -1,7 +1,7 @@
 /*globals RL*/
 var rl = RL;
 var game = new rl.Game();
-
+var x = 3;
 var keyBindings = {
     up: ['UP_ARROW', 'K', 'W'],
     down: ['DOWN_ARROW', 'J', 'S'],

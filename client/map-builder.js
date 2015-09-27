@@ -1,8 +1,4 @@
-module.exports = {
-    build: build
-}
-
-function build(rot, width, height){
+exports.build = function(rot, width, height) {
     var map = randomMap(rot, width, height);
     return {
         defaultType: 'floor',

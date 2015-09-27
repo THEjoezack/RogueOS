@@ -10,6 +10,7 @@ var through2 = require('through2');
 
 // Development Dependencies
 var jshint = require('gulp-jshint');
+var connect = require('gulp-connect');
 
 // Test Dependencies
 var mocha = require('gulp-mocha');
@@ -42,10 +43,6 @@ gulp.task('test', ['lint-client', 'lint-test'], function() {
     .on('error', util.log);
 });
 
-gulp.task('watch', function () {
-    gulp.watch(['./client/**', 'test/**'], ['test']);
-});
-
 gulp.task('clean', function(){
   return gulp.src(['./public', './build'], {read:false})
     .pipe(clean());
@@ -67,4 +64,11 @@ gulp.task('bundle', ['clean'], function () {
             });
       }))
       .pipe(gulp.dest('./build/'))
+});
+
+gulp.task('dev', ['test', 'publish'], function() {
+    connect.server({
+        root: 'public',
+        livereload: true
+    });
 });

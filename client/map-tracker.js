@@ -1,7 +1,3 @@
-module.exports = {
-    shuffle: shuffle
-};
-
-function shuffle(array) {
+exports.shuffle = function(array) {
     return require('knuth-shuffle').knuthShuffle(array.slice(0));
 }

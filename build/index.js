@@ -2,7 +2,7 @@
 /*globals RL*/
 var rl = RL;
 var game = new rl.Game();
-
+var x = 3;
 var keyBindings = {
     up: ['UP_ARROW', 'K', 'W'],
     down: ['DOWN_ARROW', 'J', 'S'],
@@ -68,11 +68,7 @@ game.console.log('The game starts.');
 // start the game
 game.start();
 },{"./map-builder":2,"./map-tracker":3}],2:[function(require,module,exports){
-module.exports = {
-    build: build
-}
-
-function build(rot, width, height){
+exports.build = function(rot, width, height) {
     var map = randomMap(rot, width, height);
     return {
         defaultType: 'floor',
@@ -120,13 +116,8 @@ var staticMap = function() {
         '#####################'
     ];
 }
-
 },{}],3:[function(require,module,exports){
-module.exports = {
-    shuffle: shuffle
-};
-
-function shuffle(array) {
+exports.shuffle = function(array) {
     return require('knuth-shuffle').knuthShuffle(array.slice(0));
 }
 },{"knuth-shuffle":4}],4:[function(require,module,exports){
