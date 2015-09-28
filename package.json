@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/THEjoezack/RogueOS",
   "devDependencies": {
-    "browserify-shim": "^3.8.10",
     "chai": "^3.2.0",
     "gulp": "^3.9.0",
     "gulp-autoprefixer": "^3.0.1",
