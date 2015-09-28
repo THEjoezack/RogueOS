@@ -66,9 +66,13 @@ gulp.task('bundle', ['clean'], function () {
       .pipe(gulp.dest('./build/'))
 });
 
-gulp.task('dev', ['test', 'publish'], function() {
+gulp.task('dev', ['publish'], function() {
     connect.server({
         root: 'public',
         livereload: true
     });
+});
+
+gulp.task('watch', function () {
+    gulp.watch(['client/**'], ['publish']);
 });

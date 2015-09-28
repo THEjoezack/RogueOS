@@ -1,8 +1,58 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+exports.create = function(game) {
+    return {
+        name: 'Box',
+        char: 'X',
+        color: '#CCCCFF',
+        bgColor: '#CCCCFF',
+        bump: function(entity){
+            // bumping entity is the player
+            if(entity === game.player){
+                var pusherX = entity.x,
+                    pusherY = entity.y,
+                    directionX = this.x - pusherX,
+                    directionY = this.y - pusherY,
+                    targetX = this.x + directionX,
+                    targetY = this.y + directionY;
+
+                // check if can be pushed into destination
+                var targetPushEnt = game.entityManager.get(targetX, targetY);
+                if(!targetPushEnt || targetPushEnt.passable){
+                    var targetPushTile = game.map.get(targetX, targetY);
+                    if(targetPushTile.passable){
+                        var prevX = this.x,
+                            prevY = this.y;
+                        // push target entity into tile
+                        this.moveTo(targetX, targetY);
+                        // move player into previously occupied tile
+                        entity.moveTo(prevX, prevY);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    };
+};
+},{}],2:[function(require,module,exports){
+exports.create = function(game) {
+    return {
+        name: 'Button',
+        char: 'O',
+        color: '#RRCCCC',
+        bgColor: '#CCCCCC',
+        passable: true
+    };
+};
+},{}],3:[function(require,module,exports){
+// entities
+var box = require('./box');
+var button = require('./button');
+
 /*globals RL*/
 var rl = RL;
 var game = new rl.Game();
-var x = 3;
+
 var keyBindings = {
     up: ['UP_ARROW', 'K', 'W'],
     down: ['DOWN_ARROW', 'J', 'S'],
@@ -11,42 +61,35 @@ var keyBindings = {
 };
 
 var mapBuilder = require('./map-builder');
-var mapData = mapBuilder.build(ROT, 50, 50);
+var level = mapBuilder.build(1);
 
-game.map.loadTilesFromArrayString(mapData.map, mapData.charToType, mapData.defaultType);
-game.entityManager.loadFromArrayString(mapData.map, {
-    'Z': 'zombie'
-});
+game.map.loadTilesFromArrayString(level.map, level.charToType, level.defaultType);
 
-// add some lights
-game.lighting.set(3, 7, 0, 0, 128);
-game.lighting.set(12, 7, 0, 128, 0);
-
-// generate and assign a map object (repaces empty default)
+// generate and assign a map object (replaces empty default)
 game.setMapSize(game.map.width, game.map.height);
 
 // add input keybindings
 game.input.addBindings(keyBindings);
 
 // create entities and add to game.entityManager
-var entZombie = new rl.Entity(game, 'zombie');
-game.entityManager.add(2, 8, entZombie);
-
-var tracker = require('./map-tracker');
-var shuffled = tracker.shuffle(mapData.freeSpaces);
-
-// toss some zombies in there!
-for(var i = 0; i < 10; i++) {
-    var spot = shuffled.pop();
-    game.entityManager.add(spot.x, spot.y, 'zombie');
+function addEntity(entity, items) {
+    for(var i = 0; i < items.length; i++) {
+        var position = items[i];
+        var item = new rl.Entity(game, entity);
+        game.entityManager.add(position.x, position.y, item);
+    }
 }
 
-var playerSpot = shuffled.pop();
-game.player.x = playerSpot.x;
-game.player.y = playerSpot.y;
+// add entities
+rl.Entity.Types.box = box.create(game);
+addEntity('box', level.boxes);
+rl.Entity.Types.button = button.create(game);
+addEntity('button', level.buttons);
+game.player.x = level.startingPosition.x;
+game.player.y = level.startingPosition.x;
 
 // make the view a little smaller
-//game.renderer.resize(10, 14);
+//game.renderer.resize(20, 20);
 
 // get existing DOM elements
 var document = window.document;
@@ -59,86 +102,76 @@ consoleContainerEl.appendChild(game.console.el);
 
 game.renderer.layers = [
     new rl.RendererLayer(game, 'map',       {draw: false,   mergeWithPrevLayer: false}),
-    new rl.RendererLayer(game, 'entity',    {draw: false,   mergeWithPrevLayer: true}),
-    new rl.RendererLayer(game, 'lighting',  {draw: true,    mergeWithPrevLayer: false}),
-    new rl.RendererLayer(game, 'fov',       {draw: true,    mergeWithPrevLayer: false}),
+    new rl.RendererLayer(game, 'entity',    {draw: true,   mergeWithPrevLayer: true}),
+    //new rl.RendererLayer(game, 'lighting',  {draw: true,    mergeWithPrevLayer: false}),
+    new rl.RendererLayer(game, 'fov',       {draw: false,    mergeWithPrevLayer: false}),
 ];
 
 game.console.log('The game starts.');
 // start the game
 game.start();
-},{"./map-builder":2,"./map-tracker":3}],2:[function(require,module,exports){
-exports.build = function(rot, width, height) {
-    var map = randomMap(rot, width, height);
-    return {
-        defaultType: 'floor',
-        charToType: charToType,
-        map: map.map,
-        freeSpaces: map.freeSpaces,
-        width: width,
-        height: height
-    };
-}
-
+},{"./box":1,"./button":2,"./map-builder":4}],4:[function(require,module,exports){
 var charToType = {
     '#': 'wall',
     '.': 'floor',
-    '+': 'door'
+    'O': 'button',
+    'X': 'box'
 };
 
-var randomMap = function(rot, width, height) {
-    var digger = new rot.Map.Digger(width, height);
-    var map = [];
-    var freeSpaces = [];
-    var digCallback = function(x, y, value) {
-        if(!map[x]) {
-            map[x] = [];
-        }
-        if (value) {
-            map[x][y] = "#";
-        } else {
-            map[x][y] = ".";
-            freeSpaces.push({ x: x, y: y});
+function swap(s, index) {
+    return s.substr(0, index) + '.' + s.substr(index + 1);
+}
+
+function loadLevel() {
+    var result = {
+        width: 9,
+        height: 9,
+        map: [
+            '#########',
+            '#@..#####',
+            '#.XX#####',
+            '#.X.###O#',
+            '###.###O#',
+            '###....O#',
+            '##...#..#',
+            '##...####',
+            '#########'
+        ]
+    };
+
+    var map = result.map;
+    result.boxes = [];
+    result.buttons = [];
+    for(var y = 0; y < map.length; y++) {
+        for(var x = 0; x < map[y].length; x++) {
+            if(map[y][x] === '@') {
+                result.startingPosition = { x: x, y: y };
+                map[y] = swap(map[y], x);
+            }
+            if(map[y][x] === 'X') {
+                result.boxes.push({ x: x, y: y});
+                map[y] = swap(map[y], x);
+            }
+            if(map[y][x] === 'O') {
+                result.buttons.push({ x: x, y: y});
+                map[y] = swap(map[y], x);
+            }
         }
     }
-    digger.create(digCallback.bind(this));
-    return { map: map, freeSpaces: freeSpaces };
+    return result;
 }
-},{}],3:[function(require,module,exports){
-exports.shuffle = function(array) {
-    return require('knuth-shuffle').knuthShuffle(array.slice(0));
-}
-},{"knuth-shuffle":4}],4:[function(require,module,exports){
-(function (global){
-/*jshint -W054 */
-(function (exports) {
-  'use strict';
 
-  // http://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-  function shuffle(array) {
-    var currentIndex = array.length
-      , temporaryValue
-      , randomIndex
-      ;
+exports.build = function(levelNumber) {
+    var level = loadLevel(level);
+    return {
+        level: levelNumber,
+        defaultType: 'nothing',
+        charToType: charToType,
+        map: level.map,
+        startingPosition: level.startingPosition,
+        boxes: level.boxes,
+        buttons: level.buttons
+    };
+};
 
-    // While there remain elements to shuffle...
-    while (0 !== currentIndex) {
-
-      // Pick a remaining element...
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-
-      // And swap it with the current element.
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-
-    return array;
-  }
-
-  exports.knuthShuffle = shuffle;
-}('undefined' !== typeof exports && exports || 'undefined' !== typeof window && window || global));
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[1]);
+},{}]},{},[3]);

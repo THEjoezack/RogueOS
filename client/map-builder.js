@@ -1,33 +1,62 @@
 var charToType = {
     '#': 'wall',
     '.': 'floor',
-    '+': 'door'
+    'O': 'button',
+    'X': 'box'
 };
 
-var randomMap = function(digger) {
-    var map = [];
-    var freeSpaces = [];
-    var digCallback = function(x, y, value) {
-        if(!map[x]) {
-            map[x] = [];
-        }
-        if (value) {
-            map[x][y] = '#';
-        } else {
-            map[x][y] = '.';
-            freeSpaces.push({ x: x, y: y});
-        }
+function swap(s, index) {
+    return s.substr(0, index) + '.' + s.substr(index + 1);
+}
+
+function loadLevel() {
+    var result = {
+        width: 9,
+        height: 9,
+        map: [
+            '#########',
+            '#@..#####',
+            '#.XX#####',
+            '#.X.###O#',
+            '###.###O#',
+            '###....O#',
+            '##...#..#',
+            '##...####',
+            '#########'
+        ]
     };
-    digger.create(digCallback.bind(this));
-    return { map: map, freeSpaces: freeSpaces };
-};
 
-exports.build = function(digger) {
-    var map = randomMap(digger);
+    var map = result.map;
+    result.boxes = [];
+    result.buttons = [];
+    for(var y = 0; y < map.length; y++) {
+        for(var x = 0; x < map[y].length; x++) {
+            if(map[y][x] === '@') {
+                result.startingPosition = { x: x, y: y };
+                map[y] = swap(map[y], x);
+            }
+            if(map[y][x] === 'X') {
+                result.boxes.push({ x: x, y: y});
+                map[y] = swap(map[y], x);
+            }
+            if(map[y][x] === 'O') {
+                result.buttons.push({ x: x, y: y});
+                map[y] = swap(map[y], x);
+            }
+        }
+    }
+    return result;
+}
+
+exports.build = function(levelNumber) {
+    var level = loadLevel(level);
     return {
-        defaultType: 'floor',
+        level: levelNumber,
+        defaultType: 'nothing',
         charToType: charToType,
-        map: map.map,
-        freeSpaces: map.freeSpaces
+        map: level.map,
+        startingPosition: level.startingPosition,
+        boxes: level.boxes,
+        buttons: level.buttons
     };
 };

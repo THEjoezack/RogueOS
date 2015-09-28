@@ -1,9 +1,9 @@
-/*globals ROT*/
-var rot = ROT;
+// entities
+var box = require('./box');
+var button = require('./button');
 
 /*globals RL*/
 var rl = RL;
-
 var game = new rl.Game();
 
 var keyBindings = {
@@ -14,44 +14,35 @@ var keyBindings = {
 };
 
 var mapBuilder = require('./map-builder');
+var level = mapBuilder.build(1);
 
-var digger = new rot.Map.Digger(50, 50);
-var mapData = mapBuilder.build(digger);
+game.map.loadTilesFromArrayString(level.map, level.charToType, level.defaultType);
 
-game.map.loadTilesFromArrayString(mapData.map, mapData.charToType, mapData.defaultType);
-game.entityManager.loadFromArrayString(mapData.map, {
-    'Z': 'zombie'
-});
-
-// add some lights
-game.lighting.set(3, 7, 0, 0, 128);
-game.lighting.set(12, 7, 0, 128, 0);
-
-// generate and assign a map object (repaces empty default)
+// generate and assign a map object (replaces empty default)
 game.setMapSize(game.map.width, game.map.height);
 
 // add input keybindings
 game.input.addBindings(keyBindings);
 
 // create entities and add to game.entityManager
-var entZombie = new rl.Entity(game, 'zombie');
-game.entityManager.add(2, 8, entZombie);
-
-var tracker = require('./map-tracker');
-var shuffled = tracker.shuffle(mapData.freeSpaces);
-
-// toss some zombies in there!
-for(var i = 0; i < 10; i++) {
-    var spot = shuffled.pop();
-    game.entityManager.add(spot.x, spot.y, 'zombie');
+function addEntity(entity, items) {
+    for(var i = 0; i < items.length; i++) {
+        var position = items[i];
+        var item = new rl.Entity(game, entity);
+        game.entityManager.add(position.x, position.y, item);
+    }
 }
 
-var playerSpot = shuffled.pop();
-game.player.x = playerSpot.x;
-game.player.y = playerSpot.y;
+// add entities
+rl.Entity.Types.box = box.create(game);
+addEntity('box', level.boxes);
+rl.Entity.Types.button = button.create(game);
+addEntity('button', level.buttons);
+game.player.x = level.startingPosition.x;
+game.player.y = level.startingPosition.x;
 
 // make the view a little smaller
-//game.renderer.resize(10, 14);
+//game.renderer.resize(20, 20);
 
 // get existing DOM elements
 var document = window.document;
@@ -64,9 +55,9 @@ consoleContainerEl.appendChild(game.console.el);
 
 game.renderer.layers = [
     new rl.RendererLayer(game, 'map',       {draw: false,   mergeWithPrevLayer: false}),
-    new rl.RendererLayer(game, 'entity',    {draw: false,   mergeWithPrevLayer: true}),
-    new rl.RendererLayer(game, 'lighting',  {draw: true,    mergeWithPrevLayer: false}),
-    new rl.RendererLayer(game, 'fov',       {draw: true,    mergeWithPrevLayer: false}),
+    new rl.RendererLayer(game, 'entity',    {draw: true,   mergeWithPrevLayer: true}),
+    //new rl.RendererLayer(game, 'lighting',  {draw: true,    mergeWithPrevLayer: false}),
+    new rl.RendererLayer(game, 'fov',       {draw: false,    mergeWithPrevLayer: false}),
 ];
 
 game.console.log('The game starts.');
