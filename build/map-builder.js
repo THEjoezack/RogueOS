@@ -3,15 +3,19 @@ exports.build = function(rot, width, height) {
     var map = randomMap(rot, width, height);
     return {
         defaultType: 'floor',
-        charToType: {
-            '#': 'wall',
-            '.': 'floor',
-            '+': 'door'
-        },
+        charToType: charToType,
         map: map.map,
-        freeSpaces: map.freeSpaces
+        freeSpaces: map.freeSpaces,
+        width: width,
+        height: height
     };
 }
+
+var charToType = {
+    '#': 'wall',
+    '.': 'floor',
+    '+': 'door'
+};
 
 var randomMap = function(rot, width, height) {
     var digger = new rot.Map.Digger(width, height);
@@ -30,21 +34,5 @@ var randomMap = function(rot, width, height) {
     }
     digger.create(digCallback.bind(this));
     return { map: map, freeSpaces: freeSpaces };
-}
-
-var staticMap = function() {
-    return [
-        '#####################',
-        '#.........#.........#',
-        '#.........#....##...#',
-        '#.........+....##...#',
-        '#.........#.........#',
-        '#.#..#..#.#.........#',
-        '#.........#...####+##',
-        '#.........#...#.....#',
-        '#.........#...#.....#',
-        '#.........#...#.....#',
-        '#####################'
-    ];
 }
 },{}]},{},[1]);

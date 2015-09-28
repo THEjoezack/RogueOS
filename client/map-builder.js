@@ -1,19 +1,10 @@
-exports.build = function(rot, width, height) {
-    var map = randomMap(rot, width, height);
-    return {
-        defaultType: 'floor',
-        charToType: {
-            '#': 'wall',
-            '.': 'floor',
-            '+': 'door'
-        },
-        map: map.map,
-        freeSpaces: map.freeSpaces
-    };
-}
+var charToType = {
+    '#': 'wall',
+    '.': 'floor',
+    '+': 'door'
+};
 
-var randomMap = function(rot, width, height) {
-    var digger = new rot.Map.Digger(width, height);
+var randomMap = function(digger) {
     var map = [];
     var freeSpaces = [];
     var digCallback = function(x, y, value) {
@@ -21,28 +12,22 @@ var randomMap = function(rot, width, height) {
             map[x] = [];
         }
         if (value) {
-            map[x][y] = "#";
+            map[x][y] = '#';
         } else {
-            map[x][y] = ".";
+            map[x][y] = '.';
             freeSpaces.push({ x: x, y: y});
         }
-    }
+    };
     digger.create(digCallback.bind(this));
     return { map: map, freeSpaces: freeSpaces };
-}
+};
 
-var staticMap = function() {
-    return [
-        '#####################',
-        '#.........#.........#',
-        '#.........#....##...#',
-        '#.........+....##...#',
-        '#.........#.........#',
-        '#.#..#..#.#.........#',
-        '#.........#...####+##',
-        '#.........#...#.....#',
-        '#.........#...#.....#',
-        '#.........#...#.....#',
-        '#####################'
-    ];
-}
+exports.build = function(digger) {
+    var map = randomMap(digger);
+    return {
+        defaultType: 'floor',
+        charToType: charToType,
+        map: map.map,
+        freeSpaces: map.freeSpaces
+    };
+};

@@ -1,7 +1,11 @@
+/*globals ROT*/
+var rot = ROT;
+
 /*globals RL*/
 var rl = RL;
+
 var game = new rl.Game();
-var x = 3;
+
 var keyBindings = {
     up: ['UP_ARROW', 'K', 'W'],
     down: ['DOWN_ARROW', 'J', 'S'],
@@ -10,7 +14,9 @@ var keyBindings = {
 };
 
 var mapBuilder = require('./map-builder');
-var mapData = mapBuilder.build(ROT, 50, 50);
+
+var digger = new rot.Map.Digger(50, 50);
+var mapData = mapBuilder.build(digger);
 
 game.map.loadTilesFromArrayString(mapData.map, mapData.charToType, mapData.defaultType);
 game.entityManager.loadFromArrayString(mapData.map, {
