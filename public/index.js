@@ -2,9 +2,9 @@
 exports.create = function(game) {
     return {
         name: 'Box',
-        char: 'X',
-        color: '#CCCCFF',
-        bgColor: '#CCCCFF',
+        char: 'H',
+        color: '#FF8000',
+        bgColor: '#663300',
         bump: function(entity){
             // bumping entity is the player
             if(entity === game.player){
@@ -31,27 +31,31 @@ exports.create = function(game) {
                 }
             }
             return false;
+        },
+        onEntityEnter: function(entity) {
+            console.log(entity);
         }
     };
 };
 },{}],2:[function(require,module,exports){
-exports.create = function(game) {
-    return {
-        name: 'Button',
-        char: 'O',
-        color: '#RRCCCC',
-        bgColor: '#CCCCCC',
-        passable: true
-    };
-};
-},{}],3:[function(require,module,exports){
 // entities
 var box = require('./box');
-var button = require('./button');
+//var button = require('./button');
 
 /*globals RL*/
 var rl = RL;
+
+rl.Tile.Types.button = {
+    name: 'Button',
+    char: 'X',
+    color: '#CC0000',
+    bgColor: '#CCCCCC',
+    passable: true,
+    blocksLos: false
+};
+
 var game = new rl.Game();
+game.entityCanSeeThrough = function() { return true; }
 
 var keyBindings = {
     up: ['UP_ARROW', 'K', 'W'],
@@ -62,7 +66,6 @@ var keyBindings = {
 
 var mapBuilder = require('./map-builder');
 var level = mapBuilder.build(1);
-
 game.map.loadTilesFromArrayString(level.map, level.charToType, level.defaultType);
 
 // generate and assign a map object (replaces empty default)
@@ -83,8 +86,26 @@ function addEntity(entity, items) {
 // add entities
 rl.Entity.Types.box = box.create(game);
 addEntity('box', level.boxes);
-rl.Entity.Types.button = button.create(game);
-addEntity('button', level.buttons);
+for(var i = 0; i < level.boxes; i++) {
+    var position = level.boxes[i];
+    game.map.get(position.x, position.y).onEntityEnter = function() {
+        console.log('box');
+        console.log(arguments);
+    }
+}
+
+//rl.Entity.Types.button = button.create(game);
+//addEntity('button', level.buttons);
+//for(var i = 0; i < level.buttons; i++) {
+//    var position = level.buttons[i];
+//    game.map.get(position.x, position.y).onEntityEnter = function() {
+//        console.log('button');
+//        console.log(arguments);
+//    }
+//}
+
+game.map.get(0,0).onEntityEnter
+
 game.player.x = level.startingPosition.x;
 game.player.y = level.startingPosition.x;
 
@@ -110,12 +131,12 @@ game.renderer.layers = [
 game.console.log('The game starts.');
 // start the game
 game.start();
-},{"./box":1,"./button":2,"./map-builder":4}],4:[function(require,module,exports){
+},{"./box":1,"./map-builder":3}],3:[function(require,module,exports){
 var charToType = {
     '#': 'wall',
     '.': 'floor',
-    'O': 'button',
-    'X': 'box'
+    'X': 'button',
+    'H': 'box'
 };
 
 function swap(s, index) {
@@ -127,15 +148,15 @@ function loadLevel() {
         width: 9,
         height: 9,
         map: [
-            '#########',
-            '#@..#####',
-            '#.XX#####',
-            '#.X.###O#',
-            '###.###O#',
-            '###....O#',
-            '##...#..#',
-            '##...####',
-            '#########'
+            '#####    ',
+            '#@..#    ',
+            '#.HH# ###',
+            '#.H.# #X#',
+            '###.###X#',
+            ' ##....X#',
+            ' #...#..#',
+            ' #...####',
+            ' ##### '
         ]
     };
 
@@ -148,13 +169,12 @@ function loadLevel() {
                 result.startingPosition = { x: x, y: y };
                 map[y] = swap(map[y], x);
             }
-            if(map[y][x] === 'X') {
+            if(map[y][x] === 'H') {
                 result.boxes.push({ x: x, y: y});
                 map[y] = swap(map[y], x);
             }
-            if(map[y][x] === 'O') {
+            if(map[y][x] === 'X') {
                 result.buttons.push({ x: x, y: y});
-                map[y] = swap(map[y], x);
             }
         }
     }
@@ -174,4 +194,4 @@ exports.build = function(levelNumber) {
     };
 };
 
-},{}]},{},[3]);
+},{}]},{},[2]);

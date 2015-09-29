@@ -2,10 +2,14 @@
 exports.create = function(game) {
     return {
         name: 'Button',
-        char: 'O',
-        color: '#RRCCCC',
+        char: 'X',
+        color: '#CC0000',
         bgColor: '#CCCCCC',
-        passable: true
+        passable: true,
+        onEntityEnter: function(entity) {
+            debugger;
+            console.log(entity);
+        }
     };
 };
 },{}]},{},[1]);

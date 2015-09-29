@@ -1,10 +1,21 @@
 // entities
 var box = require('./box');
-var button = require('./button');
+//var button = require('./button');
 
 /*globals RL*/
 var rl = RL;
+
+rl.Tile.Types.button = {
+    name: 'Button',
+    char: 'X',
+    color: '#CC0000',
+    bgColor: '#CCCCCC',
+    passable: true,
+    blocksLos: false
+};
+
 var game = new rl.Game();
+game.entityCanSeeThrough = function() { return true; }
 
 var keyBindings = {
     up: ['UP_ARROW', 'K', 'W'],
@@ -15,7 +26,6 @@ var keyBindings = {
 
 var mapBuilder = require('./map-builder');
 var level = mapBuilder.build(1);
-
 game.map.loadTilesFromArrayString(level.map, level.charToType, level.defaultType);
 
 // generate and assign a map object (replaces empty default)
@@ -36,8 +46,26 @@ function addEntity(entity, items) {
 // add entities
 rl.Entity.Types.box = box.create(game);
 addEntity('box', level.boxes);
-rl.Entity.Types.button = button.create(game);
-addEntity('button', level.buttons);
+for(var i = 0; i < level.boxes; i++) {
+    var position = level.boxes[i];
+    game.map.get(position.x, position.y).onEntityEnter = function() {
+        console.log('box');
+        console.log(arguments);
+    }
+}
+
+//rl.Entity.Types.button = button.create(game);
+//addEntity('button', level.buttons);
+//for(var i = 0; i < level.buttons; i++) {
+//    var position = level.buttons[i];
+//    game.map.get(position.x, position.y).onEntityEnter = function() {
+//        console.log('button');
+//        console.log(arguments);
+//    }
+//}
+
+game.map.get(0,0).onEntityEnter
+
 game.player.x = level.startingPosition.x;
 game.player.y = level.startingPosition.x;
 

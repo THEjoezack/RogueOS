@@ -2,9 +2,9 @@
 exports.create = function(game) {
     return {
         name: 'Box',
-        char: 'X',
-        color: '#CCCCFF',
-        bgColor: '#CCCCFF',
+        char: 'H',
+        color: '#FF8000',
+        bgColor: '#663300',
         bump: function(entity){
             // bumping entity is the player
             if(entity === game.player){
@@ -31,6 +31,9 @@ exports.create = function(game) {
                 }
             }
             return false;
+        },
+        onEntityEnter: function(entity) {
+            console.log(entity);
         }
     };
 };

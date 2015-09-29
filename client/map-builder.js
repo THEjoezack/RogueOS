@@ -1,8 +1,8 @@
 var charToType = {
     '#': 'wall',
     '.': 'floor',
-    'O': 'button',
-    'X': 'box'
+    'X': 'button',
+    'H': 'box'
 };
 
 function swap(s, index) {
@@ -14,15 +14,15 @@ function loadLevel() {
         width: 9,
         height: 9,
         map: [
-            '#########',
-            '#@..#####',
-            '#.XX#####',
-            '#.X.###O#',
-            '###.###O#',
-            '###....O#',
-            '##...#..#',
-            '##...####',
-            '#########'
+            '#####    ',
+            '#@..#    ',
+            '#.HH# ###',
+            '#.H.# #X#',
+            '###.###X#',
+            ' ##....X#',
+            ' #...#..#',
+            ' #...####',
+            ' ##### '
         ]
     };
 
@@ -35,13 +35,12 @@ function loadLevel() {
                 result.startingPosition = { x: x, y: y };
                 map[y] = swap(map[y], x);
             }
-            if(map[y][x] === 'X') {
+            if(map[y][x] === 'H') {
                 result.boxes.push({ x: x, y: y});
                 map[y] = swap(map[y], x);
             }
-            if(map[y][x] === 'O') {
+            if(map[y][x] === 'X') {
                 result.buttons.push({ x: x, y: y});
-                map[y] = swap(map[y], x);
             }
         }
     }
