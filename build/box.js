@@ -6,6 +6,8 @@ exports.create = function(game) {
         color: '#FF8000',
         bgColor: '#663300',
         bump: function(entity){
+            var observer = require("node-observer");
+
             // bumping entity is the player
             if(entity === game.player){
                 var pusherX = entity.x,
@@ -22,11 +24,22 @@ exports.create = function(game) {
                     if(targetPushTile.passable){
                         var prevX = this.x,
                             prevY = this.y;
+
+                        observer.send(this, 'pushSuccess', targetPushEnt);
+
                         // push target entity into tile
                         this.moveTo(targetX, targetY);
+
                         // move player into previously occupied tile
                         entity.moveTo(prevX, prevY);
+
+                        if(targetPushTile.type === "button") {
+                            observer.send(this, 'buttonCovered', targetPushTile);
+                        }
+
                         return true;
+                    } else {
+                        observer.send(this, 'pushFailed', targetPushEnt);
                     }
                 }
             }
@@ -37,4 +50,50 @@ exports.create = function(game) {
         }
     };
 };
+},{"node-observer":2}],2:[function(require,module,exports){
+"use strict";
+
+var Observer = function() {
+  	this.subscriber = [];
+};
+
+Observer.prototype.subscribe = function(who, what, cb) {
+	if (!this.subscriber[what]) {
+		this.subscriber[what] = [];
+	}
+
+	for(var i = 0; i < this.subscriber[what].length; i++) {
+		var o = this.subscriber[what][i];
+		if (o.item == who && o.callback == cb) {
+			return;
+		}
+	}
+
+	this.subscriber[what].push({item: who, callback: cb });	
+};
+
+Observer.prototype.unsubscribe = function(who, what) {
+	if (!this.subscriber[what]) return;
+
+	for(var i = 0; i < this.subscriber[what].length; i++) {
+		var o = this.subscriber[what][i];
+		if (o.item == who) {
+			this.subscriber[what].splice(i, 1);
+			return;
+		}
+	}
+
+};
+
+Observer.prototype.send = function(who, what, data) {
+	if (!this.subscriber[what]) return;
+
+	for(var i = 0; i < this.subscriber[what].length; i++) {
+		var o = this.subscriber[what][i];
+		o.callback(who, data);
+	}
+};
+
+module.exports = new Observer();
+
 },{}]},{},[1]);

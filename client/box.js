@@ -5,6 +5,8 @@ exports.create = function(game) {
         color: '#FF8000',
         bgColor: '#663300',
         bump: function(entity){
+            var observer = require("node-observer");
+
             // bumping entity is the player
             if(entity === game.player){
                 var pusherX = entity.x,
@@ -21,11 +23,22 @@ exports.create = function(game) {
                     if(targetPushTile.passable){
                         var prevX = this.x,
                             prevY = this.y;
+
+                        observer.send(this, 'pushSuccess', targetPushEnt);
+
                         // push target entity into tile
                         this.moveTo(targetX, targetY);
+
                         // move player into previously occupied tile
                         entity.moveTo(prevX, prevY);
+
+                        if(targetPushTile.type === "button") {
+                            observer.send(this, 'buttonCovered', targetPushTile);
+                        }
+
                         return true;
+                    } else {
+                        observer.send(this, 'pushFailed', targetPushEnt);
                     }
                 }
             }

@@ -6,6 +6,8 @@ exports.create = function(game) {
         color: '#FF8000',
         bgColor: '#663300',
         bump: function(entity){
+            var observer = require("node-observer");
+
             // bumping entity is the player
             if(entity === game.player){
                 var pusherX = entity.x,
@@ -22,11 +24,22 @@ exports.create = function(game) {
                     if(targetPushTile.passable){
                         var prevX = this.x,
                             prevY = this.y;
+
+                        observer.send(this, 'pushSuccess', targetPushEnt);
+
                         // push target entity into tile
                         this.moveTo(targetX, targetY);
+
                         // move player into previously occupied tile
                         entity.moveTo(prevX, prevY);
+
+                        if(targetPushTile.type === "button") {
+                            observer.send(this, 'buttonCovered', targetPushTile);
+                        }
+
                         return true;
+                    } else {
+                        observer.send(this, 'pushFailed', targetPushEnt);
                     }
                 }
             }
@@ -37,9 +50,11 @@ exports.create = function(game) {
         }
     };
 };
-},{}],2:[function(require,module,exports){
+},{"node-observer":4}],2:[function(require,module,exports){
 // entities
 var box = require('./box');
+var observer = require("node-observer");
+
 //var button = require('./button');
 
 /*globals RL*/
@@ -89,20 +104,8 @@ addEntity('box', level.boxes);
 for(var i = 0; i < level.boxes; i++) {
     var position = level.boxes[i];
     game.map.get(position.x, position.y).onEntityEnter = function() {
-        console.log('box');
-        console.log(arguments);
     }
 }
-
-//rl.Entity.Types.button = button.create(game);
-//addEntity('button', level.buttons);
-//for(var i = 0; i < level.buttons; i++) {
-//    var position = level.buttons[i];
-//    game.map.get(position.x, position.y).onEntityEnter = function() {
-//        console.log('button');
-//        console.log(arguments);
-//    }
-//}
 
 game.map.get(0,0).onEntityEnter
 
@@ -119,7 +122,7 @@ var consoleContainerEl = document.getElementById('example-console-container');
 
 // append elements created by the game to the DOM
 mapContainerEl.appendChild(game.renderer.canvas);
-consoleContainerEl.appendChild(game.console.el);
+//consoleContainerEl.appendChild(game.console.el);
 
 game.renderer.layers = [
     new rl.RendererLayer(game, 'map',       {draw: false,   mergeWithPrevLayer: false}),
@@ -128,10 +131,46 @@ game.renderer.layers = [
     new rl.RendererLayer(game, 'fov',       {draw: false,    mergeWithPrevLayer: false}),
 ];
 
-game.console.log('The game starts.');
+//game.console.log('The game starts.');
+
+observer.subscribe(this, 'pushSuccess', function(who, data) {
+    //console.log('pushSuccess;')
+});
+
+observer.subscribe(this, 'pushFailed', function(who, data) {
+    //console.log('pushFailed;')
+});
+observer.subscribe(this, 'buttonCovered', function(who, coveredButton) {
+    function isCovered(position) {
+        var entities = game.entityManager.objects;
+        for(var i = 0; i < entities.length; i++) {
+            if(entities[i].type === 'box' && entities[i].x === position.x && entities[i].y === position.y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    for(var i = 0; i < level.buttons.length; i++) {
+        var position = level.buttons[i];
+        if(position.x == coveredButton.x && position.y == coveredButton.y) {
+            continue;
+        }
+        if(isCovered(position)) {
+            continue;
+        }
+        return;
+    }
+    observer.send(this, 'levelComplete');
+});
+
+observer.subscribe(this, 'levelComplete', function(who, data) {
+    alert('you did it! onto the next level (eventually)');
+});
+
 // start the game
 game.start();
-},{"./box":1,"./map-builder":3}],3:[function(require,module,exports){
+},{"./box":1,"./map-builder":3,"node-observer":4}],3:[function(require,module,exports){
 var charToType = {
     '#': 'wall',
     '.': 'floor',
@@ -193,5 +232,51 @@ exports.build = function(levelNumber) {
         buttons: level.buttons
     };
 };
+
+},{}],4:[function(require,module,exports){
+"use strict";
+
+var Observer = function() {
+  	this.subscriber = [];
+};
+
+Observer.prototype.subscribe = function(who, what, cb) {
+	if (!this.subscriber[what]) {
+		this.subscriber[what] = [];
+	}
+
+	for(var i = 0; i < this.subscriber[what].length; i++) {
+		var o = this.subscriber[what][i];
+		if (o.item == who && o.callback == cb) {
+			return;
+		}
+	}
+
+	this.subscriber[what].push({item: who, callback: cb });	
+};
+
+Observer.prototype.unsubscribe = function(who, what) {
+	if (!this.subscriber[what]) return;
+
+	for(var i = 0; i < this.subscriber[what].length; i++) {
+		var o = this.subscriber[what][i];
+		if (o.item == who) {
+			this.subscriber[what].splice(i, 1);
+			return;
+		}
+	}
+
+};
+
+Observer.prototype.send = function(who, what, data) {
+	if (!this.subscriber[what]) return;
+
+	for(var i = 0; i < this.subscriber[what].length; i++) {
+		var o = this.subscriber[what][i];
+		o.callback(who, data);
+	}
+};
+
+module.exports = new Observer();
 
 },{}]},{},[2]);
